@@ -1,4 +1,5 @@
 import json
+import random
 
 from django.db.models import Sum, Count
 from django.shortcuts import render
@@ -10,7 +11,7 @@ from django.views.generic import View
 from courese.models import LearnWarning, StGgrade
 from madmin.models import Assist, AssistTeacher
 from reposityory.models import HotJob
-from users.models import MyMessage
+from users.models import MyMessage, AssitStudy
 from xq_type.models import personal_type, Types, Technologys
 
 
@@ -118,6 +119,9 @@ class InterestView(View):
             med_id = (jobs[0])['id']
             count_job = HotJob.objects.filter(type_name_id=med_id).annotate(count_j=Count('title'))
             count_job=len(count_job)
+            # 生成随机码
+            range_code = random.randint(10000, 99999)
+            AssitStudy.objects.filter(number=request.user).update(rangeCode=range_code)
 
             return render(request, 'stu/inst.html', {
                 "all_interest":all_interest,
@@ -133,6 +137,7 @@ class InterestView(View):
                 'favor':favor,
                 'job_List':job_List,
                 'count_job':count_job,
+                'range_code':range_code,
 
             })
         else:

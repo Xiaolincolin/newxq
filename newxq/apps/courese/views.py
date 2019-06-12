@@ -1,11 +1,12 @@
 import json
+import random
 
 from django.db.models import Sum
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 
 from madmin.models import Assist, AssistTeacher
-from users.models import MyMessage
+from users.models import MyMessage, AssitStudy
 from .models import Coursetable, LearnWarning, MajorSystem, StCredit
 from django.views.generic import View
 from .models import StGgrade
@@ -50,6 +51,9 @@ class CoursetableView(View):
             fail_exam = StGgrade.objects.filter(st_id=info, grade__lt=60).aggregate(grade_sum=Sum('credit'))
             fail_exam_sum = fail_exam['grade_sum']
 
+            # 生成随机码
+            range_code = random.randint(10000, 99999)
+            AssitStudy.objects.filter(number=request.user).update(rangeCode=range_code)
 
             return render(request, 'stu/stu_course.html', {
                 'mycourse':mycourse,
@@ -60,6 +64,7 @@ class CoursetableView(View):
                 'assist_teacher_info': json.dumps(assist_teacher_info),
                 'fail_exam_sum': json.dumps(fail_exam_sum),
                 'fail_courese':fail_courese,
+                'range_code':range_code,
 
             })
         else:
@@ -198,6 +203,10 @@ class StudentCreaditView(View):
             if fail_exam_sum == None:
                 fail_exam_sum = 0
 
+            # 生成随机码
+            range_code = random.randint(10000, 99999)
+            AssitStudy.objects.filter(number=request.user).update(rangeCode=range_code)
+
             return render(request, 'stu/xuefen.html', {
                 'info':info,
                 'student_warm_leve':json.dumps(str(student_warm_leve),ensure_ascii=False),
@@ -211,6 +220,7 @@ class StudentCreaditView(View):
                 'mycreadit_grade':mycreadit_grade,
                 'all_faile_courese': json.dumps(all_faile_courese),
                 'fail_exam_sum': json.dumps(fail_exam_sum),
+                'range_code':range_code,
                 })
         else:
             return HttpResponseRedirect('/')
